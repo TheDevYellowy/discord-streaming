@@ -9,8 +9,6 @@ ws.on('open', () => event.auth(ws));
 ws.on('message', rawData => {
     var data = JSON.parse(rawData.toString('utf8'));
 
-    // console.log(data)
-
     switch(data['op']) {
         case 0:
             event.ready(ws, data);

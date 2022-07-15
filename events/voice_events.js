@@ -13,6 +13,7 @@ function auth(ws, mdata) {
             video: true
         }
     }));
+    console.log('Voice Auth')
 }
 
 function heartbeat(ws, data) {
@@ -26,22 +27,101 @@ function heartbeat(ws, data) {
     }, last_beat)
 }
 
-function ready(ws) {
+function start(ws, mdata) {
     ws.send(JSON.stringify({
-        op: 1,
+        op: 16,
+        d: {}
+    }), () => {
+        ws.send(JSON.stringify({
+            op: 12,
+            d: {
+                audio_ssrc: 0,
+                rtx_ssrc: 0,
+                streams: [
+                    {
+                        active: false,
+                        max_bitrate: 4000000,
+                        max_framerate: 30,
+                        max_resolution: { type: "fixed", width: 1280, height: 720 },
+                        quality: 100,
+                        rtx_ssrc: mdata.rtx_ssrc,
+                        ssrc: mdata.ssrc,
+                        type: "video"
+                    }
+                ],
+                video_ssrc: 0
+            }
+        }), () => {
+            ws.send(JSON.stringify({
+                op: 1,
+                d: {
+                    codecs: [
+                        {name: 'opus', type: 'audio', priority: 1000, payload_type: 111, rtx_payload_type: null},
+                        {name: "H264", type: "video", priority: 1000, payload_type: 127, rtx_payload_type: 121},
+                        {name: "VP8", type: "video", priority: 2000, payload_type: 96, rtx_payload_type: 97},
+                        {name: "VP9", type: "video", priority: 3000, payload_type: 98, rtx_payload_type: 99}
+                    ],
+                    data: "a=extmap-allow-mixed\na=ice-ufrag:sjkp\na=ice-pwd:xMoDtfWLHAIHBjyNxAmM2jyO\na=ice-options:trickle\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\na=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01\na=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid\na=rtpmap:111 opus/48000/2\na=extmap:14 urn:ietf:params:rtp-hdrext:toffset\na=extmap:13 urn:3gpp:video-orientation\na=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay\na=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type\na=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing\na=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space\na=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\na=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id\na=rtpmap:96 VP8/90000\na=rtpmap:97 rtx/90000",
+                    protocol: "webrtc",
+                    rtc_connection_id: v4(),
+                    sdp: "a=extmap-allow-mixed\na=ice-ufrag:sjkp\na=ice-pwd:xMoDtfWLHAIHBjyNxAmM2jyO\na=ice-options:trickle\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\na=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01\na=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid\na=rtpmap:111 opus/48000/2\na=extmap:14 urn:ietf:params:rtp-hdrext:toffset\na=extmap:13 urn:3gpp:video-orientation\na=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay\na=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type\na=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing\na=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space\na=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\na=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id\na=rtpmap:96 VP8/90000\na=rtpmap:97 rtx/90000"
+                }
+            }))
+        })
+    })
+}
+
+function startStream(ws, mdata) {
+    ws.send(JSON.stringify({
+        op: 12,
         d: {
-            codecs: [
-                {name: 'opus', type: 'audio', priority: 1000, payload_type: 111, rtx_payload_type: null},
-                {name: "H264", type: "video", priority: 1000, payload_type: 127, rtx_payload_type: 121},
-                {name: "VP8", type: "video", priority: 2000, payload_type: 96, rtx_payload_type: 97},
-                {name: "VP9", type: "video", priority: 3000, payload_type: 98, rtx_payload_type: 99}
+            audio_ssrc: 0,
+            rtx_ssrc: 0,
+            streams: [
+                {
+                    active: false,
+                    max_bitrate: 4000000,
+                    max_framerate: 30,
+                    max_resolution: { type: "fixed", width: 1280, height: 720 },
+                    quality: 100,
+                    rtx_ssrc: mdata.rtx_ssrc,
+                    ssrc: mdata.ssrc,
+                    type: "video"
+                }
             ],
-            data: "a=extmap-allow-mixed\\na=ice-ufrag:sjkp\\na=ice-pwd:xMoDtfWLHAIHBjyNxAmM2jyO\\na=ice-options:trickle\\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\\na=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01\\na=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid\\na=rtpmap:111 opus/48000/2\\na=extmap:14 urn:ietf:params:rtp-hdrext:toffset\\na=extmap:13 urn:3gpp:video-orientation\\na=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay\\na=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type\\na=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing\\na=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space\\na=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\\na=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id\\na=rtpmap:96 VP8/90000\\na=rtpmap:97 rtx/90000",
-            protocol: "webrtc",
-            rtc_connection_id: v4(),
-            sdp: "a=extmap-allow-mixed\\na=ice-ufrag:sjkp\\na=ice-pwd:xMoDtfWLHAIHBjyNxAmM2jyO\\na=ice-options:trickle\\na=extmap:1 urn:ietf:params:rtp-hdrext:ssrc-audio-level\\na=extmap:2 http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time\\na=extmap:3 http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01\\na=extmap:4 urn:ietf:params:rtp-hdrext:sdes:mid\\na=rtpmap:111 opus/48000/2\\na=extmap:14 urn:ietf:params:rtp-hdrext:toffset\\na=extmap:13 urn:3gpp:video-orientation\\na=extmap:5 http://www.webrtc.org/experiments/rtp-hdrext/playout-delay\\na=extmap:6 http://www.webrtc.org/experiments/rtp-hdrext/video-content-type\\na=extmap:7 http://www.webrtc.org/experiments/rtp-hdrext/video-timing\\na=extmap:8 http://www.webrtc.org/experiments/rtp-hdrext/color-space\\na=extmap:10 urn:ietf:params:rtp-hdrext:sdes:rtp-stream-id\\na=extmap:11 urn:ietf:params:rtp-hdrext:sdes:repaired-rtp-stream-id\\na=rtpmap:96 VP8/90000\\na=rtpmap:97 rtx/90000"
+            video_ssrc: 0
         }
-    }))
+    }), () => {
+        ws.send(JSON.stringify({
+            op: 5,
+            d: {
+                speaking: 0,
+                delay: 5,
+                ssrc: 0
+            }
+        }), () => {
+            ws.send(JSON.stringify({
+                op: 12,
+                d: {
+                    audio_ssrc: 0,
+                    rtx_ssrc: mdata.rtx_ssrc,
+                    streams: [
+                        {
+                            active: true,
+                            max_bitrate: 4000000,
+                            max_framerate: 30,
+                            max_resolution: { type: "fixed", width: 1280, height: 720 },
+                            quality: 100,
+                            rtx_ssrc: mdata.rtx_ssrc,
+                            ssrc: mdata.ssrc,
+                            type: "video"
+                        }
+                    ],
+                    video_ssrc: mdata.ssrc
+                }
+            }))
+        })
+    })
 }
 
 function session(ws, data, mdata) {
@@ -51,6 +131,7 @@ function session(ws, data, mdata) {
 module.exports = {
     auth,
     heartbeat,
-    ready,
+    start,
+    startStream,
     session
 }

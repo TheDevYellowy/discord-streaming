@@ -1,7 +1,6 @@
 const events = require('./events/voice_events');
 
 module.exports = mdata => {
-    console.log('a')
     const WebSocket = require('ws');
     let video_ssrc, rtx_ssrc;
 
@@ -11,19 +10,16 @@ module.exports = mdata => {
     ws.on('message', data => {
         data = JSON.parse(data.toString('utf8'));
 
-        console.log({ data })
-
         switch(data['op']) {
             case 2:
-                events.ready(ws)
+                console.log('Trying to stream')
                 video_ssrc = data['d'].streams[0].ssrc;
                 rtx_ssrc = data['d'].streams[0].rtx_ssrc;
-                events.session(ws, data, { video_ssrc, rtx_ssrc });
+                events.start(ws, { rtx_ssrc, ssrc: video_ssrc });
                 break;
 
             case 4:
-                events.session(ws, data, { video_ssrc, rtx_ssrc });
-                console.log({ data });
+                events.startStream(ws, { rtx_ssrc, ssrc: video_ssrc });
                 break;
 
             case 6:
@@ -33,8 +29,8 @@ module.exports = mdata => {
                 events.heartbeat(ws, data['d']);
                 break;
 
-            // default:
-            //     ![5,15].includes(data['op']) && console.log({ data })
+            default:
+                console.log({ data })
         }
     })
 }
