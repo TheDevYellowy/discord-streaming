@@ -1,0 +1,12 @@
+{
+  "name": "discord-streaming",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/TheDevYellowy/discord-streaming.git",
+  "author": "TheDevYellowy <yellowycorn6963@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^8.3.2",
+    "ws": "^8.8.0"
+  }
+}
